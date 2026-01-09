@@ -9,14 +9,14 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 const fcFrameEmbed = JSON.stringify({
   version: "next",
-  imageUrl: "https://v0-activity-tracker-app-lime.vercel.app/frame.png",
+  imageUrl: "https://activity-tracker.online/frame.png",
   button: {
     title: "Track Activity",
     action: {
       type: "launch_miniapp",
       name: "Activity Tracker",
-      url: "https://v0-activity-tracker-app-lime.vercel.app/",
-      splashImageUrl: "https://v0-activity-tracker-app-lime.vercel.app/cover.png",
+      url: "https://activity-tracker.online/",
+      splashImageUrl: "https://activity-tracker.online/icon.png",
       splashBackgroundColor: "#0a1628",
     },
   },
@@ -31,11 +31,11 @@ export const metadata: Metadata = {
     title: "Activity Tracker | Track Your Farcaster Activity",
     description:
       "Track your Farcaster social activity without needing to log in. Get personalized tips to improve your engagement.",
-    url: "https://v0-activity-tracker-app-lime.vercel.app/",
+    url: "https://activity-tracker.online/",
     siteName: "Activity Tracker",
     images: [
       {
-        url: "https://v0-activity-tracker-app-lime.vercel.app/cover.png",
+        url: "https://activity-tracker.online/cover.png",
         width: 1500,
         height: 500,
         alt: "Activity Tracker",
@@ -48,7 +48,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Activity Tracker | Track Your Farcaster Activity",
     description: "Track your Farcaster social activity without needing to log in.",
-    images: ["https://v0-activity-tracker-app-lime.vercel.app/cover.png"],
+    images: ["https://activity-tracker.online/cover.png"],
   },
   other: {
     "base:app_id": "6961559cb8395f034ac22002",

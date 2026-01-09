@@ -11,7 +11,7 @@
     "homeUrl": "https://activity-tracker.online/",
     "imageUrl": "https://activity-tracker.online/frame.png",
     "buttonTitle": "Track Activity",
-    "splashImageUrl": "https://activity-tracker.online/cover.png",
+    "splashImageUrl": "https://activity-tracker.online/icon.png",
     "splashBackgroundColor": "#0a1628",
     "primaryCategory": "social",
     "tags": ["farcaster", "analytics", "tracker", "social", "stats"]
