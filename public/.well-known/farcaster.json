@@ -1,0 +1,19 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIn0",
+    "payload": "eyJkb21haW4iOiJ2MC1hY3Rpdml0eS10cmFja2VyLWFwcC1saW1lLnZlcmNlbC5hcHAifQ",
+    "signature": "REPLACE_WITH_YOUR_SIGNATURE"
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Activity Tracker",
+    "iconUrl": "https://v0-activity-tracker-app-lime.vercel.app/icon.jpg",
+    "homeUrl": "https://v0-activity-tracker-app-lime.vercel.app/",
+    "imageUrl": "https://v0-activity-tracker-app-lime.vercel.app/og-image.jpg",
+    "buttonTitle": "Track Activity",
+    "splashImageUrl": "https://v0-activity-tracker-app-lime.vercel.app/splash.jpg",
+    "splashBackgroundColor": "#f0f9ff",
+    "primaryCategory": "social",
+    "tags": ["farcaster", "analytics", "tracker", "social", "stats"]
+  }
+}
