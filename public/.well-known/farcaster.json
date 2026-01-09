@@ -1,18 +1,18 @@
 {
   "accountAssociation": {
-    "header": "eyJmaWQiOjAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIn0",
+    "header": "eyJmaWQiOjEwNjQwMDUsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg2ZTM0Nzk5NjExMjExYTgyMWU0MGYzYkM1OTYyNDU3NDBDZThDNTcwIn0",
     "payload": "eyJkb21haW4iOiJ2MC1hY3Rpdml0eS10cmFja2VyLWFwcC1saW1lLnZlcmNlbC5hcHAifQ",
-    "signature": "REPLACE_WITH_YOUR_SIGNATURE"
+    "signature": "nh0FVm798B49AFsy+Y6OCvu5Rfb92E3enI00QgeSRQwcCTXQ0V27Nxd/uLukKVKicQCoObGDi2KwL+mnUz4BiRw="
   },
   "miniapp": {
     "version": "1",
     "name": "Activity Tracker",
-    "iconUrl": "https://v0-activity-tracker-app-lime.vercel.app/icon.jpg",
+    "iconUrl": "https://v0-activity-tracker-app-lime.vercel.app/icon.png",
     "homeUrl": "https://v0-activity-tracker-app-lime.vercel.app/",
-    "imageUrl": "https://v0-activity-tracker-app-lime.vercel.app/og-image.jpg",
+    "imageUrl": "https://v0-activity-tracker-app-lime.vercel.app/frame.png",
     "buttonTitle": "Track Activity",
-    "splashImageUrl": "https://v0-activity-tracker-app-lime.vercel.app/splash.jpg",
-    "splashBackgroundColor": "#f0f9ff",
+    "splashImageUrl": "https://v0-activity-tracker-app-lime.vercel.app/cover.png",
+    "splashBackgroundColor": "#0a1628",
     "primaryCategory": "social",
     "tags": ["farcaster", "analytics", "tracker", "social", "stats"]
   }

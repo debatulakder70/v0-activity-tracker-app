@@ -1,11 +1,13 @@
 "use client"
 
+import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import { LogOut, Bell, Moon, Globe, Shield, User, Sparkles, Save } from "lucide-react"
+import { LogOut, Bell, Moon, Globe, Shield, User, Sparkles, Save, BellRing, CheckCircle2 } from "lucide-react"
 import { useFarcasterUser } from "@/hooks/use-farcaster"
+import { useNotifications } from "@/hooks/use-notifications"
 
 interface SettingsSectionProps {
   username: string
@@ -14,6 +16,42 @@ interface SettingsSectionProps {
 
 export function SettingsSection({ username, onLogout }: SettingsSectionProps) {
   const { user } = useFarcasterUser(username)
+  const { permission, preferences, isSupported, requestPermission, updatePreference, showNotification } =
+    useNotifications(username)
+
+  const [permissionRequested, setPermissionRequested] = useState(false)
+
+  // Handle notification toggle
+  const handleNotificationToggle = async (
+    key: "activityReminders" | "weeklySummary" | "goalAlerts",
+    checked: boolean,
+  ) => {
+    if (checked && permission === "default") {
+      setPermissionRequested(true)
+      const granted = await requestPermission()
+      setPermissionRequested(false)
+      if (!granted) return
+    }
+
+    await updatePreference(key, checked)
+  }
+
+  // Test notification button
+  const handleTestNotification = () => {
+    if (permission !== "granted") {
+      requestPermission().then((granted) => {
+        if (granted) {
+          showNotification(
+            "Notifications Working! 🎉",
+            "You'll now receive activity reminders, weekly summaries, and goal alerts.",
+            "settings",
+          )
+        }
+      })
+    } else {
+      showNotification("Test Notification", "Your notifications are set up correctly!", "settings")
+    }
+  }
 
   return (
     <div className="space-y-4 md:space-y-8 w-full max-w-2xl overflow-hidden px-1">
@@ -94,48 +132,122 @@ export function SettingsSection({ username, onLogout }: SettingsSectionProps) {
         </div>
       </Card>
 
-      {/* Notification settings with 3D toggles */}
+      {/* Notification settings with real functionality */}
       <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl bg-white border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgb(0,0,0,0.08)] transition-all duration-500 card-3d relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-gradient-to-br from-amber-100/50 to-transparent rounded-full blur-2xl" />
 
         <div className="relative">
-          <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-8">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-200/50 flex-shrink-0">
-              <Bell className="w-5 h-5 md:w-6 md:h-6 text-white" />
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <div className="flex items-center gap-2 md:gap-3">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-200/50 flex-shrink-0">
+                <Bell className="w-5 h-5 md:w-6 md:h-6 text-white" />
+              </div>
+              <h2 className="text-base md:text-lg font-bold text-slate-800">Notifications</h2>
             </div>
-            <h2 className="text-base md:text-lg font-bold text-slate-800">Notifications</h2>
+            {isSupported && (
+              <div
+                className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                  permission === "granted"
+                    ? "bg-emerald-100 text-emerald-600"
+                    : permission === "denied"
+                      ? "bg-red-100 text-red-600"
+                      : "bg-amber-100 text-amber-600"
+                }`}
+              >
+                {permission === "granted" ? (
+                  <>
+                    <CheckCircle2 className="w-3 h-3" />
+                    Enabled
+                  </>
+                ) : permission === "denied" ? (
+                  "Blocked"
+                ) : (
+                  "Not enabled"
+                )}
+              </div>
+            )}
           </div>
 
-          <div className="space-y-3 md:space-y-5">
-            {[
-              {
-                label: "Activity reminders",
-                description: "Get reminded to post daily",
-                defaultChecked: true,
-              },
-              {
-                label: "Weekly summary",
-                description: "Receive weekly stats report",
-                defaultChecked: true,
-              },
-              {
-                label: "Goal alerts",
-                description: "Notify when you reach goals",
-                defaultChecked: false,
-              },
-            ].map((setting) => (
-              <div
-                key={setting.label}
-                className="flex items-center justify-between py-2 md:py-3 px-2 md:px-4 rounded-lg md:rounded-xl hover:bg-slate-50/80 transition-colors duration-300"
-              >
-                <div className="mr-2">
-                  <p className="font-semibold text-sm md:text-base text-slate-700">{setting.label}</p>
-                  <p className="text-xs md:text-sm text-slate-400">{setting.description}</p>
+          {isSupported && permission !== "granted" && (
+            <div className="mb-4 p-3 md:p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200">
+              <div className="flex items-start gap-3">
+                <BellRing className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-amber-800">Enable notifications</p>
+                  <p className="text-xs text-amber-600 mt-0.5">
+                    {permission === "denied"
+                      ? "Notifications are blocked. Please enable them in your browser settings."
+                      : "Get real-time reminders and alerts to stay on top of your Farcaster activity."}
+                  </p>
+                  {permission === "default" && (
+                    <Button
+                      size="sm"
+                      onClick={handleTestNotification}
+                      disabled={permissionRequested}
+                      className="mt-2 h-8 px-3 text-xs bg-amber-500 hover:bg-amber-600 text-white rounded-lg"
+                    >
+                      {permissionRequested ? "Requesting..." : "Enable Notifications"}
+                    </Button>
+                  )}
                 </div>
-                <Switch defaultChecked={setting.defaultChecked} className="flex-shrink-0" />
               </div>
-            ))}
+            </div>
+          )}
+
+          <div className="space-y-3 md:space-y-5">
+            <div className="flex items-center justify-between py-2 md:py-3 px-2 md:px-4 rounded-lg md:rounded-xl hover:bg-slate-50/80 transition-colors duration-300">
+              <div className="mr-2">
+                <p className="font-semibold text-sm md:text-base text-slate-700">Activity reminders</p>
+                <p className="text-xs md:text-sm text-slate-400">Get reminded to post daily at 9 AM</p>
+              </div>
+              <Switch
+                checked={preferences.activityReminders}
+                onCheckedChange={(checked) => handleNotificationToggle("activityReminders", checked)}
+                disabled={permission === "denied"}
+                className="flex-shrink-0"
+              />
+            </div>
+
+            <div className="flex items-center justify-between py-2 md:py-3 px-2 md:px-4 rounded-lg md:rounded-xl hover:bg-slate-50/80 transition-colors duration-300">
+              <div className="mr-2">
+                <p className="font-semibold text-sm md:text-base text-slate-700">Weekly summary</p>
+                <p className="text-xs md:text-sm text-slate-400">Receive weekly stats report</p>
+              </div>
+              <Switch
+                checked={preferences.weeklySummary}
+                onCheckedChange={(checked) => handleNotificationToggle("weeklySummary", checked)}
+                disabled={permission === "denied"}
+                className="flex-shrink-0"
+              />
+            </div>
+
+            <div className="flex items-center justify-between py-2 md:py-3 px-2 md:px-4 rounded-lg md:rounded-xl hover:bg-slate-50/80 transition-colors duration-300">
+              <div className="mr-2">
+                <p className="font-semibold text-sm md:text-base text-slate-700">Goal alerts</p>
+                <p className="text-xs md:text-sm text-slate-400">Notify when you reach goals</p>
+              </div>
+              <Switch
+                checked={preferences.goalAlerts}
+                onCheckedChange={(checked) => handleNotificationToggle("goalAlerts", checked)}
+                disabled={permission === "denied"}
+                className="flex-shrink-0"
+              />
+            </div>
           </div>
+
+          {permission === "granted" && (
+            <div className="mt-4 pt-4 border-t border-slate-100">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleTestNotification}
+                className="w-full h-10 text-sm rounded-xl border-amber-200 text-amber-600 hover:bg-amber-50 bg-transparent"
+              >
+                <BellRing className="w-4 h-4 mr-2" />
+                Send Test Notification
+              </Button>
+            </div>
+          )}
         </div>
       </Card>
 
