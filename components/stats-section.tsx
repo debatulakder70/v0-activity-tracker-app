@@ -1,7 +1,7 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { TrendingUp, Target, Award, Loader2, Sparkles, Users } from "lucide-react"
+import { TrendingUp, Target, Award, Loader2, Sparkles, Users, MessageCircle, Heart, Repeat2 } from "lucide-react"
 import { useFarcasterUser, useFarcasterCasts, calculateEngagementStats, formatNumber } from "@/hooks/use-farcaster"
 
 interface StatsSectionProps {
@@ -36,11 +36,26 @@ export function StatsSection({ username }: StatsSectionProps) {
     )
   }
 
-  const followerRank = Math.min(100, Math.round((user.follower_count / 10000) * 100))
-  const rankingData = {
-    rankings: [62, 78, 45, followerRank, 71, 84, 55, 68],
-    userPosition: 3,
-  }
+  const castEngagementData = casts.slice(0, 8).map((cast) => ({
+    likes: cast.reactions.likes_count,
+    recasts: cast.reactions.recasts_count,
+    replies: cast.replies.count,
+    total: cast.reactions.likes_count + cast.reactions.recasts_count + cast.replies.count,
+  }))
+
+  // Normalize to percentage heights based on max engagement
+  const maxEngagement = Math.max(...castEngagementData.map((d) => d.total), 1)
+  const chartBars = castEngagementData.map((d, i) => ({
+    height: Math.max(10, Math.round((d.total / maxEngagement) * 100)),
+    isHighest: d.total === maxEngagement && d.total > 0,
+    index: i,
+  }))
+
+  // Find the best performing cast index
+  const bestCastIndex = chartBars.findIndex((b) => b.isHighest)
+
+  const followRatio = user.following_count > 0 ? user.follower_count / user.following_count : user.follower_count
+  const growthRate = Math.round(followRatio * 100)
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -117,7 +132,7 @@ export function StatsSection({ username }: StatsSectionProps) {
         ))}
       </div>
 
-      {/* Success story - responsive */}
+      {/* Success story - using real data */}
       <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl bg-white border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
         <div className="relative">
           <div className="flex items-center justify-center mb-4 md:mb-8">
@@ -139,82 +154,98 @@ export function StatsSection({ username }: StatsSectionProps) {
             <span className="text-slate-400">on Farcaster</span>
           </h2>
 
-          {/* Chart - responsive */}
           <div className="mt-6 md:mt-10 bg-gradient-to-br from-slate-50 to-white rounded-2xl md:rounded-3xl p-4 md:p-8 border border-slate-100/50">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm md:text-base font-semibold text-slate-700">Recent Cast Performance</h3>
+              <span className="text-xs text-slate-400">Last {casts.length} casts</span>
+            </div>
             <div className="relative h-40 md:h-56">
               {/* Y-axis labels */}
               <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs md:text-sm text-slate-400 font-medium">
-                <span>{formatNumber(user.follower_count)}</span>
-                <span>{formatNumber(Math.round(user.follower_count / 2))}</span>
+                <span>{maxEngagement}</span>
+                <span>{Math.round(maxEngagement / 2)}</span>
                 <span>0</span>
               </div>
 
               <div className="ml-10 md:ml-16 h-full flex items-end justify-around relative">
-                {[20, 35, 45, 60, 75, 90, 100].map((height, i) => (
-                  <div
-                    key={i}
-                    className={`w-6 md:w-10 rounded-t-lg md:rounded-t-xl transition-all duration-700 relative overflow-hidden ${
-                      i === 6
-                        ? "bg-gradient-to-t from-orange-500 via-orange-400 to-amber-400 shadow-xl"
-                        : "bg-gradient-to-t from-orange-200 via-orange-100 to-orange-50"
-                    }`}
-                    style={{ height: `${height}%` }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-black/5" />
-                  </div>
-                ))}
+                {chartBars.length > 0 ? (
+                  chartBars.map((bar, i) => (
+                    <div
+                      key={i}
+                      className={`w-6 md:w-10 rounded-t-lg md:rounded-t-xl transition-all duration-700 relative overflow-hidden ${
+                        bar.isHighest
+                          ? "bg-gradient-to-t from-orange-500 via-orange-400 to-amber-400 shadow-xl"
+                          : "bg-gradient-to-t from-orange-200 via-orange-100 to-orange-50"
+                      }`}
+                      style={{ height: `${bar.height}%` }}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-black/5" />
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-slate-400 text-sm">No cast data available</p>
+                )}
 
-                {/* Growth badge - responsive position */}
+                {/* Growth badge - shows real follow ratio */}
                 <div className="absolute right-0 md:right-4 top-0 md:top-4">
                   <div className="px-3 md:px-5 py-2 md:py-3 rounded-xl md:rounded-2xl bg-gradient-to-r from-orange-500 to-rose-500 shadow-xl">
-                    <span className="text-white font-bold text-sm md:text-xl">
-                      +
-                      {Math.round((user.follower_count / Math.max(user.follower_count - user.following_count, 1)) * 10)}
-                      %
-                    </span>
-                    <p className="text-orange-100 text-xs font-medium hidden sm:block">Growth rate</p>
+                    <span className="text-white font-bold text-sm md:text-xl">{growthRate}%</span>
+                    <p className="text-orange-100 text-xs font-medium hidden sm:block">Follow ratio</p>
                   </div>
                 </div>
               </div>
+            </div>
+            <div className="flex justify-around mt-2 text-xs text-slate-400">
+              {castEngagementData.slice(0, 8).map((_, i) => (
+                <span key={i}>Cast {i + 1}</span>
+              ))}
             </div>
           </div>
         </div>
       </Card>
 
-      {/* Ranking card - responsive */}
       <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl bg-white border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
         <div className="relative">
           <div className="flex justify-center mb-4 md:mb-8">
             <div className="px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-gradient-to-r from-slate-100 to-indigo-50 text-slate-600 font-semibold border border-slate-200/50 text-sm md:text-base">
-              You (FID #{user.fid})
+              Engagement Breakdown
             </div>
           </div>
 
-          <div className="flex items-end justify-center gap-2 md:gap-5 h-40 md:h-56 mb-4 md:mb-8">
-            {rankingData.rankings.map((height, i) => (
-              <div
-                key={i}
-                className={`w-5 md:w-10 rounded-t-lg md:rounded-t-xl transition-all duration-500 relative overflow-hidden ${
-                  i === rankingData.userPosition
-                    ? "bg-gradient-to-t from-indigo-600 via-indigo-500 to-sky-400 shadow-xl"
-                    : "bg-gradient-to-t from-indigo-200 via-indigo-100 to-sky-100"
-                }`}
-                style={{ height: `${height}%` }}
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-black/5" />
-                {i === rankingData.userPosition && (
-                  <div className="absolute -top-6 md:-top-8 left-1/2 -translate-x-1/2 px-1.5 md:px-2 py-0.5 md:py-1 rounded-lg bg-indigo-600 text-white text-xs font-bold">
-                    You
-                  </div>
-                )}
+          <div className="grid grid-cols-3 gap-4 md:gap-8 mb-6">
+            <div className="text-center">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-rose-400 to-pink-500 flex items-center justify-center mx-auto mb-2 shadow-lg">
+                <Heart className="w-6 h-6 md:w-8 md:h-8 text-white" />
               </div>
-            ))}
+              <p className="text-2xl md:text-3xl font-bold text-slate-800">
+                {formatNumber(engagementStats.totalLikes)}
+              </p>
+              <p className="text-xs md:text-sm text-slate-500">Total Likes</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mx-auto mb-2 shadow-lg">
+                <Repeat2 className="w-6 h-6 md:w-8 md:h-8 text-white" />
+              </div>
+              <p className="text-2xl md:text-3xl font-bold text-slate-800">
+                {formatNumber(engagementStats.totalRecasts)}
+              </p>
+              <p className="text-xs md:text-sm text-slate-500">Total Recasts</p>
+            </div>
+            <div className="text-center">
+              <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center mx-auto mb-2 shadow-lg">
+                <MessageCircle className="w-6 h-6 md:w-8 md:h-8 text-white" />
+              </div>
+              <p className="text-2xl md:text-3xl font-bold text-slate-800">
+                {formatNumber(engagementStats.totalReplies)}
+              </p>
+              <p className="text-xs md:text-sm text-slate-500">Total Replies</p>
+            </div>
           </div>
 
-          <h3 className="text-lg md:text-2xl font-bold text-slate-800 mb-2 text-center">Keep track of your rating</h3>
-          <p className="text-slate-500 text-center text-sm md:text-base">
-            {"You're"} following {formatNumber(user.following_count)} users
-          </p>
+          <h3 className="text-lg md:text-2xl font-bold text-slate-800 mb-2 text-center">
+            {engagementStats.engagementRate}% Engagement Rate
+          </h3>
+          <p className="text-slate-500 text-center text-sm md:text-base">Based on your last {casts.length} casts</p>
         </div>
       </Card>
 
