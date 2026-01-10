@@ -60,10 +60,29 @@ function getApiKey(): string {
   return apiKey
 }
 
+// Helper function to normalize username by removing common suffixes
+function normalizeUsername(username: string): string {
+  // Remove @ prefix if present
+  let normalized = username.startsWith("@") ? username.slice(1) : username
+
+  // Remove common suffixes
+  const suffixes = [".farcaster.eth", ".eth", ".fc", ".farcaster"]
+  for (const suffix of suffixes) {
+    if (normalized.toLowerCase().endsWith(suffix)) {
+      normalized = normalized.slice(0, -suffix.length)
+      break
+    }
+  }
+
+  return normalized.toLowerCase().trim()
+}
+
 // Fetch user by username
 export async function fetchUserByUsername(username: string): Promise<NeynarUser | null> {
+  const normalizedUsername = normalizeUsername(username)
+
   try {
-    const response = await fetch(`${NEYNAR_API_URL}/user/by_username?username=${username}`, {
+    const response = await fetch(`${NEYNAR_API_URL}/user/by_username?username=${normalizedUsername}`, {
       headers: {
         "x-api-key": getApiKey(),
         "Content-Type": "application/json",
@@ -72,6 +91,10 @@ export async function fetchUserByUsername(username: string): Promise<NeynarUser 
     })
 
     if (response.status === 404) {
+      const searchResults = await searchUsers(normalizedUsername, 1)
+      if (searchResults.length > 0) {
+        return searchResults[0]
+      }
       return null
     }
 
