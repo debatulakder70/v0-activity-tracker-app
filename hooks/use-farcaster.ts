@@ -56,7 +56,6 @@ export function useFarcasterSearch(query: string) {
   }
 }
 
-// Calculate engagement stats from casts
 export function calculateEngagementStats(casts: NeynarCast[]) {
   if (!casts.length) {
     return {
@@ -65,8 +64,12 @@ export function calculateEngagementStats(casts: NeynarCast[]) {
       totalReplies: 0,
       avgLikes: 0,
       avgRecasts: 0,
+      avgReplies: 0,
       engagementRate: 0,
       weeklyPosts: 0,
+      totalEngagement: 0,
+      bestCast: null as NeynarCast | null,
+      worstCast: null as NeynarCast | null,
     }
   }
 
@@ -76,7 +79,23 @@ export function calculateEngagementStats(casts: NeynarCast[]) {
   const totalLikes = casts.reduce((sum, cast) => sum + cast.reactions.likes_count, 0)
   const totalRecasts = casts.reduce((sum, cast) => sum + cast.reactions.recasts_count, 0)
   const totalReplies = casts.reduce((sum, cast) => sum + cast.replies.count, 0)
+  const totalEngagement = totalLikes + totalRecasts + totalReplies
   const weeklyPosts = casts.filter((cast) => new Date(cast.timestamp) >= weekAgo).length
+
+  // Find best and worst performing casts
+  const castsWithEngagement = casts.map((cast) => ({
+    cast,
+    engagement: cast.reactions.likes_count + cast.reactions.recasts_count + cast.replies.count,
+  }))
+  const sorted = [...castsWithEngagement].sort((a, b) => b.engagement - a.engagement)
+  const bestCast = sorted[0]?.cast || null
+  const worstCast = sorted[sorted.length - 1]?.cast || null
+
+  // Calculate engagement rate: (total engagement / number of casts) as a simple average
+  // Then express as a readable number (not divided by 100 again)
+  const avgEngagementPerPost = totalEngagement / casts.length
+  // Engagement rate = average engagement per post (as a simple metric)
+  const engagementRate = Number(avgEngagementPerPost.toFixed(1))
 
   return {
     totalLikes,
@@ -84,8 +103,12 @@ export function calculateEngagementStats(casts: NeynarCast[]) {
     totalReplies,
     avgLikes: Math.round(totalLikes / casts.length),
     avgRecasts: Math.round(totalRecasts / casts.length),
-    engagementRate: Number(((totalLikes + totalRecasts + totalReplies) / casts.length / 100).toFixed(2)),
+    avgReplies: Math.round(totalReplies / casts.length),
+    engagementRate, // Now shows avg engagement per post (e.g., 15.3 means 15.3 interactions per cast)
     weeklyPosts,
+    totalEngagement,
+    bestCast,
+    worstCast,
   }
 }
 
@@ -109,4 +132,22 @@ export function formatNumber(num: number): string {
   if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`
   if (num >= 1000) return `${(num / 1000).toFixed(1)}K`
   return num.toString()
+}
+
+export function calculateFollowRatio(followers: number, following: number): { ratio: number; label: string } {
+  if (following === 0) {
+    return { ratio: followers, label: `${formatNumber(followers)} followers` }
+  }
+
+  const ratio = followers / following
+
+  if (ratio >= 10) {
+    return { ratio, label: "Influencer" }
+  } else if (ratio >= 2) {
+    return { ratio, label: "Creator" }
+  } else if (ratio >= 1) {
+    return { ratio, label: "Balanced" }
+  } else {
+    return { ratio, label: "Networker" }
+  }
 }

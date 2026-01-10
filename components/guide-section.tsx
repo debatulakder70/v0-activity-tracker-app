@@ -37,19 +37,20 @@ export function GuideSection({ username }: GuideSectionProps) {
   const followers = user.follower_count
   const following = user.following_count
 
-  // Using a logarithmic scale: 10K+ = top 1%, 5K+ = top 5%, 1K+ = top 20%, etc.
   let percentile = 50
-  if (followers >= 10000) percentile = 1
+  if (followers >= 100000) percentile = 0.1
+  else if (followers >= 50000) percentile = 0.5
+  else if (followers >= 10000) percentile = 1
   else if (followers >= 5000) percentile = 5
-  else if (followers >= 1000) percentile = 20
-  else if (followers >= 500) percentile = 35
-  else if (followers >= 100) percentile = 50
-  else percentile = 70
+  else if (followers >= 1000) percentile = 15
+  else if (followers >= 500) percentile = 25
+  else if (followers >= 100) percentile = 40
+  else percentile = 60
 
   const nextFollowerMilestone = Math.ceil(followers / 1000) * 1000 + 1000
   const dailyCastGoal = 3
   const weeklyCastGoal = dailyCastGoal * 7
-  const engagementGoal = 5
+  const engagementGoal = 20 // Target 20 avg interactions per cast
 
   const socialTips = [
     {
@@ -65,14 +66,14 @@ export function GuideSection({ username }: GuideSectionProps) {
       icon: Users,
     },
     {
-      task: `Maintain ${engagementGoal}%+ engagement (now ${engagementStats.engagementRate}%)`,
+      task: `Get ${engagementGoal}+ avg engagement (now ${engagementStats.engagementRate})`,
       progress: Math.min(Math.round((engagementStats.engagementRate / engagementGoal) * 100), 100),
       done: engagementStats.engagementRate >= engagementGoal,
       icon: TrendingUp,
     },
     {
-      task: `Get ${formatNumber(engagementStats.avgLikes + 5)} avg likes per cast`,
-      progress: Math.min(Math.round((engagementStats.avgLikes / (engagementStats.avgLikes + 5)) * 100), 99),
+      task: `Get ${formatNumber(engagementStats.avgLikes + 10)} avg likes per cast`,
+      progress: Math.min(Math.round((engagementStats.avgLikes / (engagementStats.avgLikes + 10)) * 100), 99),
       done: false,
       icon: Target,
     },
@@ -264,12 +265,12 @@ export function GuideSection({ username }: GuideSectionProps) {
             <p className="text-[10px] md:text-xs text-slate-500">Posts this week</p>
           </div>
           <div className="text-center p-2 rounded-lg bg-white shadow-sm">
-            <p className="text-lg md:text-xl font-bold text-slate-800">{engagementStats.engagementRate}%</p>
-            <p className="text-[10px] md:text-xs text-slate-500">Engagement rate</p>
+            <p className="text-lg md:text-xl font-bold text-slate-800">{engagementStats.engagementRate}</p>
+            <p className="text-[10px] md:text-xs text-slate-500">Avg engagement</p>
           </div>
           <div className="text-center p-2 rounded-lg bg-white shadow-sm">
             <p className="text-lg md:text-xl font-bold text-slate-800">
-              {following > 0 ? (followers / following).toFixed(1) : followers}
+              {following > 0 ? (followers / following).toFixed(1) : followers}x
             </p>
             <p className="text-[10px] md:text-xs text-slate-500">Follow ratio</p>
           </div>

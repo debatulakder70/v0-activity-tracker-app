@@ -104,14 +104,14 @@ export function SocialActivitySection({ username }: SocialActivitySectionProps) 
         <StatBadge
           label="Total Likes"
           value={formatNumber(engagementStats.totalLikes)}
-          change={`avg ${engagementStats.avgLikes}/post`}
+          change={`avg ${engagementStats.avgLikes}/cast`}
           positive
           icon={<Heart className="w-4 h-4" />}
         />
         <StatBadge
           label="This Week"
           value={engagementStats.weeklyPosts.toString()}
-          change="casts"
+          change={engagementStats.weeklyPosts === 0 ? "Start posting!" : "casts"}
           icon={<MessageCircle className="w-4 h-4" />}
         />
       </div>
@@ -145,13 +145,13 @@ export function SocialActivitySection({ username }: SocialActivitySectionProps) 
               <div className="h-2 md:h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner mb-2">
                 <div
                   className="h-full bg-gradient-to-r from-sky-400 via-indigo-500 to-violet-500 rounded-full relative"
-                  style={{ width: `${Math.min(engagementStats.engagementRate * 20, 100)}%` }}
+                  style={{ width: `${Math.min(engagementStats.engagementRate * 2, 100)}%` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent" />
                 </div>
               </div>
               <p className="text-xs md:text-sm text-emerald-600 font-medium">
-                {engagementStats.engagementRate}% engagement rate
+                {engagementStats.engagementRate} avg engagement per cast
               </p>
 
               <div className="grid grid-cols-3 gap-2 md:gap-3 mt-4 md:mt-5 pt-4 md:pt-5 border-t border-slate-100">

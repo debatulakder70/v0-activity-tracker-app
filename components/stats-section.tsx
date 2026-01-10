@@ -2,7 +2,13 @@
 
 import { Card } from "@/components/ui/card"
 import { TrendingUp, Target, Award, Loader2, Sparkles, Users, MessageCircle, Heart, Repeat2 } from "lucide-react"
-import { useFarcasterUser, useFarcasterCasts, calculateEngagementStats, formatNumber } from "@/hooks/use-farcaster"
+import {
+  useFarcasterUser,
+  useFarcasterCasts,
+  calculateEngagementStats,
+  formatNumber,
+  calculateFollowRatio,
+} from "@/hooks/use-farcaster"
 
 interface StatsSectionProps {
   username: string
@@ -36,26 +42,24 @@ export function StatsSection({ username }: StatsSectionProps) {
     )
   }
 
-  const castEngagementData = casts.slice(0, 8).map((cast) => ({
+  const castEngagementData = casts.slice(0, 8).map((cast, index) => ({
     likes: cast.reactions.likes_count,
     recasts: cast.reactions.recasts_count,
     replies: cast.replies.count,
     total: cast.reactions.likes_count + cast.reactions.recasts_count + cast.replies.count,
+    text: cast.text.slice(0, 50),
+    timestamp: cast.timestamp,
+    index,
   }))
 
-  // Normalize to percentage heights based on max engagement
   const maxEngagement = Math.max(...castEngagementData.map((d) => d.total), 1)
-  const chartBars = castEngagementData.map((d, i) => ({
+  const chartBars = castEngagementData.map((d) => ({
     height: Math.max(10, Math.round((d.total / maxEngagement) * 100)),
     isHighest: d.total === maxEngagement && d.total > 0,
-    index: i,
+    data: d,
   }))
 
-  // Find the best performing cast index
-  const bestCastIndex = chartBars.findIndex((b) => b.isHighest)
-
-  const followRatio = user.following_count > 0 ? user.follower_count / user.following_count : user.follower_count
-  const growthRate = Math.round(followRatio * 100)
+  const followRatioData = calculateFollowRatio(user.follower_count, user.following_count)
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -88,23 +92,23 @@ export function StatsSection({ username }: StatsSectionProps) {
           {
             label: "Followers",
             value: formatNumber(user.follower_count),
-            change: `FID #${user.fid}`,
+            change: `Following ${formatNumber(user.following_count)}`,
             icon: Users,
             color: "from-orange-400 to-rose-500",
             shadow: "shadow-orange-200/50",
           },
           {
-            label: "Avg Likes per Cast",
-            value: engagementStats.avgLikes.toString(),
-            change: `${engagementStats.totalLikes} total`,
+            label: "Avg Engagement",
+            value: engagementStats.engagementRate.toString(),
+            change: "per cast",
             icon: TrendingUp,
             color: "from-sky-400 to-indigo-500",
             shadow: "shadow-sky-200/50",
           },
           {
-            label: "Total Recasts",
-            value: formatNumber(engagementStats.totalRecasts),
-            change: `avg ${engagementStats.avgRecasts}/post`,
+            label: "Total Engagement",
+            value: formatNumber(engagementStats.totalEngagement),
+            change: `from ${casts.length} casts`,
             icon: Target,
             color: "from-emerald-400 to-teal-500",
             shadow: "shadow-emerald-200/50",
@@ -132,7 +136,7 @@ export function StatsSection({ username }: StatsSectionProps) {
         ))}
       </div>
 
-      {/* Success story - using real data */}
+      {/* Success story with real data */}
       <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl bg-white border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
         <div className="relative">
           <div className="flex items-center justify-center mb-4 md:mb-8">
@@ -170,40 +174,50 @@ export function StatsSection({ username }: StatsSectionProps) {
               <div className="ml-10 md:ml-16 h-full flex items-end justify-around relative">
                 {chartBars.length > 0 ? (
                   chartBars.map((bar, i) => (
-                    <div
-                      key={i}
-                      className={`w-6 md:w-10 rounded-t-lg md:rounded-t-xl transition-all duration-700 relative overflow-hidden ${
-                        bar.isHighest
-                          ? "bg-gradient-to-t from-orange-500 via-orange-400 to-amber-400 shadow-xl"
-                          : "bg-gradient-to-t from-orange-200 via-orange-100 to-orange-50"
-                      }`}
-                      style={{ height: `${bar.height}%` }}
-                    >
-                      <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-black/5" />
+                    <div key={i} className="relative group">
+                      <div
+                        className={`w-6 md:w-10 rounded-t-lg md:rounded-t-xl transition-all duration-700 relative overflow-hidden cursor-pointer ${
+                          bar.isHighest
+                            ? "bg-gradient-to-t from-orange-500 via-orange-400 to-amber-400 shadow-xl"
+                            : "bg-gradient-to-t from-orange-200 via-orange-100 to-orange-50 hover:from-orange-300 hover:via-orange-200 hover:to-orange-100"
+                        }`}
+                        style={{ height: `${bar.height}%` }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-black/5" />
+                      </div>
+                      {/* Tooltip */}
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-lg">
+                        <p className="font-semibold">{bar.data.total} engagement</p>
+                        <p className="text-slate-300">
+                          ❤️ {bar.data.likes} 🔄 {bar.data.recasts} 💬 {bar.data.replies}
+                        </p>
+                      </div>
                     </div>
                   ))
                 ) : (
                   <p className="text-slate-400 text-sm">No cast data available</p>
                 )}
 
-                {/* Growth badge - shows real follow ratio */}
                 <div className="absolute right-0 md:right-4 top-0 md:top-4">
                   <div className="px-3 md:px-5 py-2 md:py-3 rounded-xl md:rounded-2xl bg-gradient-to-r from-orange-500 to-rose-500 shadow-xl">
-                    <span className="text-white font-bold text-sm md:text-xl">{growthRate}%</span>
-                    <p className="text-orange-100 text-xs font-medium hidden sm:block">Follow ratio</p>
+                    <span className="text-white font-bold text-sm md:text-xl">{followRatioData.ratio.toFixed(1)}x</span>
+                    <p className="text-orange-100 text-xs font-medium hidden sm:block">{followRatioData.label}</p>
                   </div>
                 </div>
               </div>
             </div>
             <div className="flex justify-around mt-2 text-xs text-slate-400">
-              {castEngagementData.slice(0, 8).map((_, i) => (
-                <span key={i}>Cast {i + 1}</span>
+              {castEngagementData.slice(0, 8).map((d, i) => (
+                <span key={i} className="truncate max-w-[60px]" title={d.text}>
+                  #{i + 1}
+                </span>
               ))}
             </div>
           </div>
         </div>
       </Card>
 
+      {/* Engagement breakdown with real data */}
       <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl bg-white border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
         <div className="relative">
           <div className="flex justify-center mb-4 md:mb-8">
@@ -221,6 +235,7 @@ export function StatsSection({ username }: StatsSectionProps) {
                 {formatNumber(engagementStats.totalLikes)}
               </p>
               <p className="text-xs md:text-sm text-slate-500">Total Likes</p>
+              <p className="text-xs text-slate-400">avg {engagementStats.avgLikes}/cast</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center mx-auto mb-2 shadow-lg">
@@ -230,6 +245,7 @@ export function StatsSection({ username }: StatsSectionProps) {
                 {formatNumber(engagementStats.totalRecasts)}
               </p>
               <p className="text-xs md:text-sm text-slate-500">Total Recasts</p>
+              <p className="text-xs text-slate-400">avg {engagementStats.avgRecasts}/cast</p>
             </div>
             <div className="text-center">
               <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center mx-auto mb-2 shadow-lg">
@@ -239,17 +255,18 @@ export function StatsSection({ username }: StatsSectionProps) {
                 {formatNumber(engagementStats.totalReplies)}
               </p>
               <p className="text-xs md:text-sm text-slate-500">Total Replies</p>
+              <p className="text-xs text-slate-400">avg {engagementStats.avgReplies}/cast</p>
             </div>
           </div>
 
           <h3 className="text-lg md:text-2xl font-bold text-slate-800 mb-2 text-center">
-            {engagementStats.engagementRate}% Engagement Rate
+            {engagementStats.engagementRate} avg engagement per cast
           </h3>
           <p className="text-slate-500 text-center text-sm md:text-base">Based on your last {casts.length} casts</p>
         </div>
       </Card>
 
-      {/* Goals - responsive */}
+      {/* Goals with dynamic targets */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         {[
           {
@@ -259,10 +276,10 @@ export function StatsSection({ username }: StatsSectionProps) {
             color: "sky",
           },
           {
-            label: "Engagement Goal",
-            current: engagementStats.engagementRate,
-            target: 10,
-            unit: "%",
+            label: "Weekly Casts Goal",
+            current: engagementStats.weeklyPosts,
+            target: 21, // 3 per day
+            unit: " casts",
             color: "emerald",
           },
         ].map((goal) => (
@@ -278,7 +295,6 @@ export function StatsSection({ username }: StatsSectionProps) {
             </div>
 
             <div className="flex items-center gap-4 md:gap-8">
-              {/* Circular progress - smaller on mobile */}
               <div className="relative w-20 h-20 md:w-28 md:h-28 shrink-0">
                 <svg className="w-20 h-20 md:w-28 md:h-28 -rotate-90 drop-shadow-lg">
                   <circle cx="40" cy="40" r="34" fill="none" stroke="#f1f5f9" strokeWidth="8" className="md:hidden" />
@@ -328,12 +344,17 @@ export function StatsSection({ username }: StatsSectionProps) {
               </div>
               <div>
                 <p className="text-2xl md:text-4xl font-bold text-slate-800">
-                  {goal.unit === "%" ? goal.current.toFixed(1) : formatNumber(goal.current)}
-                  {goal.unit}
+                  {goal.unit ? goal.current : formatNumber(goal.current)}
+                  {goal.unit || ""}
                 </p>
                 <p className="text-slate-400 mt-1 text-sm md:text-base">
-                  of {goal.unit === "%" ? goal.target : formatNumber(goal.target)}
-                  {goal.unit} target
+                  of {goal.unit ? goal.target : formatNumber(goal.target)}
+                  {goal.unit || ""} target
+                </p>
+                <p className="text-xs text-emerald-600 mt-2">
+                  {goal.target - goal.current > 0
+                    ? `${goal.unit ? goal.target - goal.current : formatNumber(goal.target - goal.current)} to go!`
+                    : "Goal reached! 🎉"}
                 </p>
               </div>
             </div>
