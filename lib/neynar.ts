@@ -65,8 +65,9 @@ function normalizeUsername(username: string): string {
   // Remove @ prefix if present
   let normalized = username.startsWith("@") ? username.slice(1) : username
 
-  // Remove common suffixes
-  const suffixes = [".farcaster.eth", ".eth", ".fc", ".farcaster"]
+  // Remove common suffixes (ordered from most specific to least)
+  const suffixes = [".farcaster.eth", ".base.eth", ".cb.id", ".eth", ".fc", ".farcaster"]
+
   for (const suffix of suffixes) {
     if (normalized.toLowerCase().endsWith(suffix)) {
       normalized = normalized.slice(0, -suffix.length)
@@ -79,36 +80,79 @@ function normalizeUsername(username: string): string {
 
 // Fetch user by username
 export async function fetchUserByUsername(username: string): Promise<NeynarUser | null> {
+  const originalUsername = username
   const normalizedUsername = normalizeUsername(username)
 
+  console.log("[v0] Looking up user:", { original: originalUsername, normalized: normalizedUsername })
+
+  // Strategy 1: Try direct username lookup with normalized name
   try {
     const response = await fetch(`${NEYNAR_API_URL}/user/by_username?username=${normalizedUsername}`, {
       headers: {
         "x-api-key": getApiKey(),
         "Content-Type": "application/json",
       },
-      next: { revalidate: 60 }, // Cache for 1 minute
+      next: { revalidate: 60 },
     })
 
-    if (response.status === 404) {
-      const searchResults = await searchUsers(normalizedUsername, 1)
-      if (searchResults.length > 0) {
-        return searchResults[0]
-      }
-      return null
+    if (response.ok) {
+      const data = await response.json()
+      console.log("[v0] Found user via direct lookup:", data.user?.username)
+      return data.user
     }
 
-    if (!response.ok) {
-      console.error(`Neynar API error: ${response.status}`)
-      return null
-    }
-
-    const data = await response.json()
-    return data.user
+    console.log("[v0] Direct lookup failed with status:", response.status)
   } catch (error) {
-    console.error("Error fetching user:", error)
-    return null
+    console.error("[v0] Error in direct lookup:", error)
   }
+
+  // Strategy 2: Try searching for the user
+  console.log("[v0] Trying search fallback for:", normalizedUsername)
+  try {
+    const searchResults = await searchUsers(normalizedUsername, 5)
+    console.log("[v0] Search returned", searchResults.length, "results")
+
+    if (searchResults.length > 0) {
+      // Find exact match first
+      const exactMatch = searchResults.find((u) => u.username.toLowerCase() === normalizedUsername.toLowerCase())
+      if (exactMatch) {
+        console.log("[v0] Found exact match:", exactMatch.username)
+        return exactMatch
+      }
+
+      // Otherwise return first result
+      console.log("[v0] Returning first search result:", searchResults[0].username)
+      return searchResults[0]
+    }
+  } catch (error) {
+    console.error("[v0] Error in search fallback:", error)
+  }
+
+  // Strategy 3: Try with original username (without normalization) in case it's actually valid
+  if (normalizedUsername !== originalUsername.replace("@", "").toLowerCase()) {
+    console.log("[v0] Trying original username:", originalUsername)
+    try {
+      const cleanOriginal = originalUsername.replace("@", "").toLowerCase()
+      const response = await fetch(`${NEYNAR_API_URL}/user/by_username?username=${cleanOriginal}`, {
+        headers: {
+          "x-api-key": getApiKey(),
+          "Content-Type": "application/json",
+        },
+        next: { revalidate: 60 },
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log("[v0] Found user via original username:", data.user?.username)
+        return data.user
+      }
+    } catch (error) {
+      console.error("[v0] Error with original username lookup:", error)
+    }
+  }
+
+  console.log("[v0] User not found after all strategies")
+  return null
 }
 
 // Fetch user by FID
