@@ -1,7 +1,7 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { TrendingUp, Target, Award, Loader2, Sparkles, Users, MessageCircle, Heart, Repeat2 } from "lucide-react"
+import { TrendingUp, Target, Award, Sparkles, Users, MessageCircle, Heart, Repeat2 } from "lucide-react"
 import {
   useFarcasterUser,
   useFarcasterCasts,
@@ -9,9 +9,46 @@ import {
   formatNumber,
   calculateFollowRatio,
 } from "@/hooks/use-farcaster"
+import { LoadingScreen } from "@/components/ui/activity-loader"
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+  Cell,
+  AreaChart,
+  Area,
+} from "recharts"
 
 interface StatsSectionProps {
   username: string
+}
+
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload
+    return (
+      <div className="bg-slate-800 text-white text-xs rounded-lg px-3 py-2 shadow-xl border border-slate-700">
+        <p className="font-semibold mb-1">Cast #{label}</p>
+        <div className="space-y-1">
+          <p className="flex items-center gap-1">
+            <Heart className="w-3 h-3 text-rose-400" /> {data.likes} likes
+          </p>
+          <p className="flex items-center gap-1">
+            <Repeat2 className="w-3 h-3 text-emerald-400" /> {data.recasts} recasts
+          </p>
+          <p className="flex items-center gap-1">
+            <MessageCircle className="w-3 h-3 text-sky-400" /> {data.replies} replies
+          </p>
+        </div>
+        <p className="mt-2 pt-2 border-t border-slate-600 font-bold">{data.total} total</p>
+      </div>
+    )
+  }
+  return null
 }
 
 export function StatsSection({ username }: StatsSectionProps) {
@@ -22,16 +59,7 @@ export function StatsSection({ username }: StatsSectionProps) {
   const isLoading = userLoading || castsLoading
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[300px] md:min-h-[400px]">
-        <div className="text-center space-y-4">
-          <div className="relative">
-            <Loader2 className="w-8 h-8 md:w-10 md:h-10 animate-spin text-sky-500 mx-auto" />
-          </div>
-          <p className="text-slate-500 font-medium text-sm md:text-base">Loading stats...</p>
-        </div>
-      </div>
-    )
+    return <LoadingScreen message="Loading your stats..." />
   }
 
   if (!user) {
@@ -42,24 +70,26 @@ export function StatsSection({ username }: StatsSectionProps) {
     )
   }
 
-  const castEngagementData = casts.slice(0, 8).map((cast, index) => ({
+  const chartData = casts.slice(0, 12).map((cast, index) => ({
+    name: `#${index + 1}`,
     likes: cast.reactions.likes_count,
     recasts: cast.reactions.recasts_count,
     replies: cast.replies.count,
     total: cast.reactions.likes_count + cast.reactions.recasts_count + cast.replies.count,
     text: cast.text.slice(0, 50),
-    timestamp: cast.timestamp,
-    index,
   }))
 
-  const maxEngagement = Math.max(...castEngagementData.map((d) => d.total), 1)
-  const chartBars = castEngagementData.map((d) => ({
-    height: Math.max(10, Math.round((d.total / maxEngagement) * 100)),
-    isHighest: d.total === maxEngagement && d.total > 0,
-    data: d,
-  }))
-
+  const maxEngagement = Math.max(...chartData.map((d) => d.total), 1)
   const followRatioData = calculateFollowRatio(user.follower_count, user.following_count)
+
+  const trendData = casts
+    .slice(0, 20)
+    .reverse()
+    .map((cast, index) => ({
+      name: `${index + 1}`,
+      engagement: cast.reactions.likes_count + cast.reactions.recasts_count + cast.replies.count,
+      likes: cast.reactions.likes_count,
+    }))
 
   return (
     <div className="space-y-6 md:space-y-8">
@@ -136,7 +166,6 @@ export function StatsSection({ username }: StatsSectionProps) {
         ))}
       </div>
 
-      {/* Success story with real data */}
       <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl bg-white border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
         <div className="relative">
           <div className="flex items-center justify-center mb-4 md:mb-8">
@@ -161,58 +190,103 @@ export function StatsSection({ username }: StatsSectionProps) {
           <div className="mt-6 md:mt-10 bg-gradient-to-br from-slate-50 to-white rounded-2xl md:rounded-3xl p-4 md:p-8 border border-slate-100/50">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm md:text-base font-semibold text-slate-700">Recent Cast Performance</h3>
-              <span className="text-xs text-slate-400">Last {casts.length} casts</span>
-            </div>
-            <div className="relative h-40 md:h-56">
-              {/* Y-axis labels */}
-              <div className="absolute left-0 top-0 h-full flex flex-col justify-between text-xs md:text-sm text-slate-400 font-medium">
-                <span>{maxEngagement}</span>
-                <span>{Math.round(maxEngagement / 2)}</span>
-                <span>0</span>
-              </div>
-
-              <div className="ml-10 md:ml-16 h-full flex items-end justify-around relative">
-                {chartBars.length > 0 ? (
-                  chartBars.map((bar, i) => (
-                    <div key={i} className="relative group">
-                      <div
-                        className={`w-6 md:w-10 rounded-t-lg md:rounded-t-xl transition-all duration-700 relative overflow-hidden cursor-pointer ${
-                          bar.isHighest
-                            ? "bg-gradient-to-t from-orange-500 via-orange-400 to-amber-400 shadow-xl"
-                            : "bg-gradient-to-t from-orange-200 via-orange-100 to-orange-50 hover:from-orange-300 hover:via-orange-200 hover:to-orange-100"
-                        }`}
-                        style={{ height: `${bar.height}%` }}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/30 via-transparent to-black/5" />
-                      </div>
-                      {/* Tooltip */}
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10 shadow-lg">
-                        <p className="font-semibold">{bar.data.total} engagement</p>
-                        <p className="text-slate-300">
-                          ❤️ {bar.data.likes} 🔄 {bar.data.recasts} 💬 {bar.data.replies}
-                        </p>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-slate-400 text-sm">No cast data available</p>
-                )}
-
-                <div className="absolute right-0 md:right-4 top-0 md:top-4">
-                  <div className="px-3 md:px-5 py-2 md:py-3 rounded-xl md:rounded-2xl bg-gradient-to-r from-orange-500 to-rose-500 shadow-xl">
-                    <span className="text-white font-bold text-sm md:text-xl">{followRatioData.ratio.toFixed(1)}x</span>
-                    <p className="text-orange-100 text-xs font-medium hidden sm:block">{followRatioData.label}</p>
-                  </div>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-slate-400">Last {chartData.length} casts</span>
+                <div className="px-3 md:px-4 py-1.5 md:py-2 rounded-xl md:rounded-2xl bg-gradient-to-r from-orange-500 to-rose-500 shadow-lg">
+                  <span className="text-white font-bold text-sm md:text-lg">{followRatioData.ratio.toFixed(1)}x</span>
+                  <p className="text-orange-100 text-xs font-medium hidden sm:block">{followRatioData.label}</p>
                 </div>
               </div>
             </div>
-            <div className="flex justify-around mt-2 text-xs text-slate-400">
-              {castEngagementData.slice(0, 8).map((d, i) => (
-                <span key={i} className="truncate max-w-[60px]" title={d.text}>
-                  #{i + 1}
-                </span>
-              ))}
+
+            {/* Recharts Bar Chart */}
+            <div className="h-48 md:h-64 w-full">
+              {chartData.length > 0 ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fontSize: 12, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                    <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(0,0,0,0.02)" }} />
+                    <Bar dataKey="total" radius={[8, 8, 0, 0]} maxBarSize={40}>
+                      {chartData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.total === maxEngagement ? "url(#barGradientMax)" : "url(#barGradient)"}
+                        />
+                      ))}
+                    </Bar>
+                    <defs>
+                      <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#fed7aa" />
+                        <stop offset="100%" stopColor="#ffedd5" />
+                      </linearGradient>
+                      <linearGradient id="barGradientMax" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#f97316" />
+                        <stop offset="100%" stopColor="#fb923c" />
+                      </linearGradient>
+                    </defs>
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full flex items-center justify-center text-slate-400">No cast data available</div>
+              )}
             </div>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-4 md:p-8 rounded-2xl md:rounded-3xl bg-white border-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] relative overflow-hidden">
+        <div className="relative">
+          <div className="flex justify-between items-center mb-4 md:mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center shadow-lg">
+                <TrendingUp className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-800">Engagement Trend</h3>
+                <p className="text-xs text-slate-400">Your engagement over recent casts</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-40 md:h-56 w-full">
+            {trendData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="engagementGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#0ea5e9" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+                  <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 10, fill: "#94a3b8" }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#1e293b",
+                      border: "none",
+                      borderRadius: "8px",
+                      color: "white",
+                      fontSize: "12px",
+                    }}
+                    formatter={(value: number) => [`${value} engagement`, "Total"]}
+                    labelFormatter={(label) => `Cast #${label}`}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="engagement"
+                    stroke="#0ea5e9"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#engagementGradient)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-slate-400">No trend data available</div>
+            )}
           </div>
         </div>
       </Card>
@@ -278,7 +352,7 @@ export function StatsSection({ username }: StatsSectionProps) {
           {
             label: "Weekly Casts Goal",
             current: engagementStats.weeklyPosts,
-            target: 21, // 3 per day
+            target: 21,
             unit: " casts",
             color: "emerald",
           },
@@ -354,7 +428,7 @@ export function StatsSection({ username }: StatsSectionProps) {
                 <p className="text-xs text-emerald-600 mt-2">
                   {goal.target - goal.current > 0
                     ? `${goal.unit ? goal.target - goal.current : formatNumber(goal.target - goal.current)} to go!`
-                    : "Goal reached! 🎉"}
+                    : "Goal reached!"}
                 </p>
               </div>
             </div>

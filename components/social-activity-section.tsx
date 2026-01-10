@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDown, Heart, MessageCircle, TrendingUp, Users, Loader2, Repeat2, Sparkles } from "lucide-react"
+import { ChevronDown, Heart, MessageCircle, TrendingUp, Users, Repeat2, Sparkles } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { ActivityCard } from "@/components/activity-card"
 import { StatBadge } from "@/components/stat-badge"
@@ -11,6 +11,7 @@ import {
   formatRelativeTime,
   formatNumber,
 } from "@/hooks/use-farcaster"
+import { LoadingScreen } from "@/components/ui/activity-loader"
 
 interface SocialActivitySectionProps {
   username: string
@@ -24,17 +25,7 @@ export function SocialActivitySection({ username }: SocialActivitySectionProps) 
   const isLoading = userLoading || castsLoading
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[300px] md:min-h-[400px]">
-        <div className="text-center space-y-4">
-          <div className="relative">
-            <Loader2 className="w-8 h-8 md:w-10 md:h-10 animate-spin text-sky-500 mx-auto" />
-            <div className="absolute inset-0 w-8 h-8 md:w-10 md:h-10 mx-auto rounded-full bg-sky-400/20 animate-ping" />
-          </div>
-          <p className="text-slate-500 font-medium text-sm md:text-base">Loading Farcaster data...</p>
-        </div>
-      </div>
-    )
+    return <LoadingScreen message="Loading Farcaster data..." />
   }
 
   if (!user) {
@@ -144,7 +135,7 @@ export function SocialActivitySection({ username }: SocialActivitySectionProps) 
 
               <div className="h-2 md:h-3 bg-slate-100 rounded-full overflow-hidden shadow-inner mb-2">
                 <div
-                  className="h-full bg-gradient-to-r from-sky-400 via-indigo-500 to-violet-500 rounded-full relative"
+                  className="h-full bg-gradient-to-r from-sky-400 via-indigo-500 to-violet-500 rounded-full relative transition-all duration-1000"
                   style={{ width: `${Math.min(engagementStats.engagementRate * 2, 100)}%` }}
                 >
                   <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent" />

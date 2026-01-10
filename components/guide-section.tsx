@@ -1,8 +1,9 @@
 "use client"
 
 import { Card } from "@/components/ui/card"
-import { Lightbulb, CheckCircle2, Circle, Target, Zap, ThumbsUp, Loader2, TrendingUp, Clock, Users } from "lucide-react"
+import { Lightbulb, CheckCircle2, Circle, Target, Zap, ThumbsUp, TrendingUp, Clock, Users } from "lucide-react"
 import { useFarcasterUser, useFarcasterCasts, calculateEngagementStats, formatNumber } from "@/hooks/use-farcaster"
+import { LoadingScreen } from "@/components/ui/activity-loader"
 
 interface GuideSectionProps {
   username: string
@@ -16,14 +17,7 @@ export function GuideSection({ username }: GuideSectionProps) {
   const isLoading = userLoading || castsLoading
 
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[200px] md:min-h-[300px]">
-        <div className="text-center space-y-3">
-          <Loader2 className="w-6 h-6 md:w-8 md:h-8 animate-spin text-sky-500 mx-auto" />
-          <p className="text-slate-500 font-medium text-xs md:text-sm">Loading guide...</p>
-        </div>
-      </div>
-    )
+    return <LoadingScreen message="Loading your guide..." />
   }
 
   if (!user) {
