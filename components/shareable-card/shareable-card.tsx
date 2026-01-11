@@ -1,8 +1,5 @@
 "use client"
-
-import { useMemo } from "react"
 import type { NeynarUser } from "@/lib/neynar"
-import { ResponsiveContainer, AreaChart, Area } from "recharts"
 import { motion } from "framer-motion"
 
 interface ShareableCardProps {
@@ -14,222 +11,151 @@ interface ShareableCardProps {
 
 const tierConfig = {
   bronze: {
-    bgGradient: "from-[#1a1a1a] to-[#2d2d2d]",
-    border: "border-[#cd7f32]",
-    glow: "rgba(205, 127, 50, 0.2)",
-    primary: "#cd7f32",
-    label: "NOOB",
-    stars: 0,
+    bgGradient: "from-orange-500 via-orange-400 to-blue-400",
+    accentColor: "rgb(255, 140, 0)",
+    label: "BRONZE",
+    icon: "🥉",
   },
   silver: {
-    bgGradient: "from-[#1e1e2e] to-[#2a2a3e]",
-    border: "border-[#c0c0c0]",
-    glow: "rgba(192, 192, 192, 0.3)",
-    primary: "#c0c0c0",
-    label: "NORMAL",
-    stars: 5,
+    bgGradient: "from-blue-400 via-cyan-400 to-purple-300",
+    accentColor: "rgb(192, 192, 192)",
+    label: "SILVER",
+    icon: "🥈",
   },
   gold: {
-    bgGradient: "from-[#1a1a2e] to-[#2d2d4a]",
-    border: "border-[#ffd700]",
-    glow: "rgba(255, 215, 0, 0.4)",
-    primary: "#ffd700",
-    label: "AVERAGE",
-    stars: 10,
+    bgGradient: "from-yellow-400 via-orange-300 to-pink-300",
+    accentColor: "rgb(255, 215, 0)",
+    label: "GOLD",
+    icon: "✨",
   },
   platinum: {
-    bgGradient: "from-[#0f0f1e] to-[#1a1a35]",
-    border: "border-[#e5e4e2]",
-    glow: "rgba(229, 228, 226, 0.5)",
-    primary: "#e5e4e2",
-    label: "GOOD",
-    stars: 20,
+    bgGradient: "from-purple-500 via-pink-400 to-cyan-400",
+    accentColor: "rgb(229, 228, 226)",
+    label: "PLATINUM",
+    icon: "💎",
   },
   diamond: {
-    bgGradient: "from-[#0a0a1a] to-[#14143a]",
-    border: "border-purple-500",
-    glow: "rgba(168, 85, 247, 0.6)",
-    primary: "rgb(168, 85, 247)",
-    label: "ELITE",
-    stars: 30,
+    bgGradient: "from-purple-600 via-violet-500 to-purple-400",
+    accentColor: "rgb(168, 85, 247)",
+    label: "DIAMOND",
+    icon: "👑",
   },
-}
-
-function generateGrowthData(stats: any) {
-  return [
-    { week: "W1", value: Math.max(1, stats.engagementRate - 10) },
-    { week: "W2", value: Math.max(1, stats.engagementRate - 8) },
-    { week: "W3", value: Math.max(1, stats.engagementRate - 5) },
-    { week: "W4", value: Math.max(1, stats.engagementRate - 2) },
-    { week: "Now", value: stats.engagementRate },
-  ]
 }
 
 export function ShareableCard({ user, stats, tier, engagementPercent }: ShareableCardProps) {
   const config = tierConfig[tier]
-  const growthData = useMemo(() => generateGrowthData(stats), [stats])
-
-  const starPositions = useMemo(() => {
-    return Array.from({ length: config.stars }).map(() => ({
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      delay: Math.random() * 3,
-    }))
-  }, [config.stars])
 
   return (
-    <div
-      className={`w-[1080px] h-[1350px] bg-gradient-to-br ${config.bgGradient} border-2 ${config.border} relative overflow-hidden`}
-      style={{
-        boxShadow: `0 0 40px ${config.glow}`,
-      }}
-    >
-      {/* Stars background */}
-      {starPositions.map((pos, i) => (
-        <motion.div
-          key={i}
-          className="absolute text-white text-lg opacity-60"
-          style={{
-            top: `${pos.top}%`,
-            left: `${pos.left}%`,
-          }}
-          animate={{
-            opacity: [0.3, 1, 0.3],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 2,
-            delay: pos.delay,
-            repeat: Number.POSITIVE_INFINITY,
-          }}
-        >
-          ✦
-        </motion.div>
-      ))}
+    <div className="w-[1080px] h-[1350px] relative overflow-hidden rounded-3xl shadow-2xl">
+      <div className={`absolute inset-0 bg-gradient-to-br ${config.bgGradient} opacity-90`} />
 
-      {/* Light rays for premium tiers */}
-      {(tier === "platinum" || tier === "diamond") && (
-        <>
-          <motion.div
-            className="absolute w-0.5 h-full bg-gradient-to-b from-transparent via-white to-transparent opacity-20"
-            animate={{
-              x: [-100, 1100],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "linear",
-            }}
-            style={{ left: "-100px" }}
-          />
-          <motion.div
-            className="absolute w-0.5 h-full bg-gradient-to-b from-transparent via-white to-transparent opacity-20"
-            animate={{
-              x: [-100, 1100],
-            }}
-            transition={{
-              duration: 8,
-              repeat: Number.POSITIVE_INFINITY,
-              ease: "linear",
-              delay: 4,
-            }}
-            style={{ right: "-100px" }}
-          />
-        </>
-      )}
+      <div className="absolute inset-0 overflow-hidden">
+        <motion.div
+          className="absolute w-96 h-96 rounded-full blur-3xl"
+          style={{
+            background: `radial-gradient(circle, ${config.accentColor}33 0%, transparent 70%)`,
+            top: "-100px",
+            right: "-50px",
+          }}
+          animate={{ y: [0, 20, 0] }}
+          transition={{ duration: 6, repeat: Number.POSITIVE_INFINITY }}
+        />
+        <motion.div
+          className="absolute w-80 h-80 rounded-full blur-3xl"
+          style={{
+            background: `radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)`,
+            bottom: "-50px",
+            left: "-100px",
+          }}
+          animate={{ y: [0, -20, 0] }}
+          transition={{ duration: 8, repeat: Number.POSITIVE_INFINITY }}
+        />
+      </div>
 
       {/* Content */}
       <div className="relative z-10 h-full flex flex-col p-12 text-white">
-        {/* Header */}
         <motion.div
-          className={`text-center mb-8 p-6 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 ${
-            tier === "diamond" ? "border-purple-400" : ""
-          }`}
+          className="text-center mb-4"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          <h1 className="text-4xl font-bold">activity tracker</h1>
-          {tier === "diamond" && <span className="text-3xl ml-2">👑</span>}
+          <h1 className="text-5xl font-bold tracking-tight">activity tracker</h1>
+          <div className="flex justify-center mt-2 text-3xl">{config.icon}</div>
         </motion.div>
 
-        {/* Stats boxes */}
         <motion.div
-          className="flex justify-between gap-6 mb-8"
+          className="flex justify-between gap-4 mb-12"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
         >
-          <div
-            className={`flex-1 p-4 rounded-lg border ${tier === "diamond" ? "border-purple-400 bg-purple-500/10" : "border-white/20 bg-white/5"} backdrop-blur`}
-          >
-            <p className="text-sm text-gray-300 mb-1">avg engagement per cast</p>
-            <p className="text-2xl font-bold">{stats.engagementRate.toFixed(1)}</p>
+          <div className="flex-1 bg-white/15 backdrop-blur-md p-6 rounded-2xl border border-white/30">
+            <p className="text-sm font-medium text-white/80 mb-2">Engagement Per Cast</p>
+            <p className="text-4xl font-bold">{stats.engagementRate.toFixed(1)}</p>
           </div>
-          <div
-            className={`flex-1 p-4 rounded-lg border ${tier === "diamond" ? "border-purple-400 bg-purple-500/10" : "border-white/20 bg-white/5"} backdrop-blur`}
-          >
-            <p className="text-sm text-gray-300 mb-1">avg like per cast</p>
-            <p className="text-2xl font-bold">{stats.avgLikes}</p>
+          <div className="flex-1 bg-white/15 backdrop-blur-md p-6 rounded-2xl border border-white/30">
+            <p className="text-sm font-medium text-white/80 mb-2">Weekly Casts</p>
+            <p className="text-4xl font-bold">{stats.weeklyPosts}</p>
           </div>
         </motion.div>
 
-        {/* Profile section */}
         <motion.div
-          className="flex flex-col items-center mb-12"
-          initial={{ opacity: 0, scale: 0.9 }}
+          className="flex flex-col items-center mb-12 flex-shrink-0"
+          initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.4 }}
         >
           <div
-            className="w-48 h-48 rounded-2xl mb-6 overflow-hidden border-4"
+            className="w-64 h-64 rounded-3xl mb-8 overflow-hidden border-4 shadow-2xl"
             style={{
-              borderColor: tier === "diamond" ? "rgb(168, 85, 247)" : config.primary,
-              boxShadow: `0 0 20px ${config.glow}`,
+              borderColor: config.accentColor,
+              boxShadow: `0 0 40px ${config.accentColor}66`,
             }}
           >
             <img src={user.pfp_url || "/placeholder.svg"} alt={user.username} className="w-full h-full object-cover" />
           </div>
-          <h2 className="text-3xl font-bold text-center">{user.display_name || user.username}</h2>
-          <p className="text-gray-400 text-lg">@{user.username}</p>
+          <h2 className="text-5xl font-bold text-center mb-2">{user.display_name || user.username}</h2>
+          <p className="text-xl text-white/80 mb-4">@{user.username}</p>
+          <p className="text-lg text-white/70 text-center max-w-md">Account growth champion</p>
         </motion.div>
 
-        {/* Chart */}
         <motion.div
-          className="flex-1 mb-8 min-h-[200px]"
+          className="grid grid-cols-3 gap-4 mb-12 flex-shrink-0"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
         >
-          <p className="text-sm text-gray-400 mb-4 text-center">account growth chart</p>
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={growthData}>
-              <defs>
-                <linearGradient id={`gradient-${tier}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={config.primary} stopOpacity={0.6} />
-                  <stop offset="100%" stopColor={config.primary} stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <Area
-                type="monotone"
-                dataKey="value"
-                stroke={config.primary}
-                fill={`url(#gradient-${tier})`}
-                strokeWidth={3}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          <div className="bg-white/10 backdrop-blur px-4 py-6 rounded-2xl text-center border border-white/20">
+            <p className="text-3xl font-bold">{stats.totalLikes.toLocaleString()}</p>
+            <p className="text-xs text-white/70 mt-2">Total Likes</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur px-4 py-6 rounded-2xl text-center border border-white/20">
+            <p className="text-3xl font-bold">{stats.totalRecasts.toLocaleString()}</p>
+            <p className="text-xs text-white/70 mt-2">Recasts</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur px-4 py-6 rounded-2xl text-center border border-white/20">
+            <p className="text-3xl font-bold">{stats.weeklyPosts}</p>
+            <p className="text-xs text-white/70 mt-2">This Week</p>
+          </div>
         </motion.div>
 
-        {/* Corner badges */}
         <motion.div
-          className="flex justify-between text-xs font-bold text-white/80"
+          className="flex justify-between items-center mt-auto pt-8 border-t border-white/20"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
         >
-          <div className="bg-black/30 backdrop-blur px-3 py-2 rounded-lg">{config.label} engagement</div>
-          <div className="bg-black/30 backdrop-blur px-3 py-2 rounded-lg">{engagementPercent.toFixed(0)}% tier</div>
+          <div className="text-sm font-bold text-white/80">activity tracker</div>
+          <div
+            className="px-6 py-3 rounded-full font-bold text-lg"
+            style={{
+              backgroundColor: config.accentColor,
+              color: "#000",
+            }}
+          >
+            {config.label} • {engagementPercent.toFixed(0)}%
+          </div>
         </motion.div>
       </div>
     </div>
