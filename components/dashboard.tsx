@@ -8,7 +8,6 @@ import { SocialActivitySection } from "@/components/social-activity-section"
 import { StatsSection } from "@/components/stats-section"
 import { GuideSection } from "@/components/guide-section"
 import { SettingsSection } from "@/components/settings-section"
-import { CardGenerator } from "@/components/shareable-card/card-generator"
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern"
 import { cn } from "@/lib/utils"
 
@@ -58,7 +57,6 @@ export function Dashboard({ username, onLogout }: DashboardProps) {
             {activeTab === "social" && <SocialActivitySection username={username} />}
             {activeTab === "stats" && <StatsSection username={username} />}
             {activeTab === "guide" && <GuideSection username={username} />}
-            {activeTab === "share" && <CardGenerator username={username} />}
             {activeTab === "settings" && <SettingsSection username={username} onLogout={onLogout} />}
           </div>
         </main>

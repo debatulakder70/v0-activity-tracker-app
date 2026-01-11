@@ -14,7 +14,6 @@ const navItems = [
   { label: "Dashboard", tab: "social" },
   { label: "Activity Guide", tab: "guide" },
   { label: "Stats", tab: "stats" },
-  { label: "Share Card", tab: "share" },
   { label: "Settings", tab: "settings" },
 ]
 

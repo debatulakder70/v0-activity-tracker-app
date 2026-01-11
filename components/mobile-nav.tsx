@@ -1,6 +1,6 @@
 "use client"
 
-import { MessageCircle, BarChart3, Lightbulb, Settings, Share2 } from "lucide-react"
+import { MessageCircle, BarChart3, Lightbulb, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 interface MobileNavProps {
@@ -12,7 +12,6 @@ const navItems = [
   { id: "social", icon: MessageCircle, label: "Social", color: "from-sky-400 to-blue-500" },
   { id: "stats", icon: BarChart3, label: "Stats", color: "from-emerald-400 to-teal-500" },
   { id: "guide", icon: Lightbulb, label: "Guide", color: "from-amber-400 to-orange-500" },
-  { id: "share", icon: Share2, label: "Card", color: "from-pink-400 to-rose-500" },
   { id: "settings", icon: Settings, label: "Settings", color: "from-slate-400 to-slate-500" },
 ]
 
