@@ -10,6 +10,7 @@ interface DashboardNavProps {
 
 const navItems = [
   { id: "social", icon: MessageCircle, label: "Social Activity", color: "from-sky-400 to-blue-500" },
+  { id: "growth", icon: TrendingUp, label: "Growth", color: "from-violet-400 to-purple-500" },
   { id: "stats", icon: BarChart3, label: "Stats", color: "from-emerald-400 to-teal-500" },
   { id: "guide", icon: Lightbulb, label: "Guide", color: "from-amber-400 to-orange-500" },
   { id: "settings", icon: Settings, label: "Settings", color: "from-slate-400 to-slate-500" },

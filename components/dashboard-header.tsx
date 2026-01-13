@@ -12,6 +12,7 @@ interface DashboardHeaderProps {
 
 const navItems = [
   { label: "Dashboard", tab: "social" },
+  { label: "Growth", tab: "growth" },
   { label: "Activity Guide", tab: "guide" },
   { label: "Stats", tab: "stats" },
   { label: "Settings", tab: "settings" },

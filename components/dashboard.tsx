@@ -10,6 +10,7 @@ import { GuideSection } from "@/components/guide-section"
 import { SettingsSection } from "@/components/settings-section"
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern"
 import { cn } from "@/lib/utils"
+import { GrowthSection } from "@/components/growth-section"
 
 interface DashboardProps {
   username: string
@@ -55,6 +56,7 @@ export function Dashboard({ username, onLogout }: DashboardProps) {
         <main className="flex-1 p-4 md:p-6 lg:p-8">
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             {activeTab === "social" && <SocialActivitySection username={username} />}
+            {activeTab === "growth" && <GrowthSection username={username} />}
             {activeTab === "stats" && <StatsSection username={username} />}
             {activeTab === "guide" && <GuideSection username={username} />}
             {activeTab === "settings" && <SettingsSection username={username} onLogout={onLogout} />}
