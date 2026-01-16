@@ -25,6 +25,20 @@ export function HeroSection({ onSubmit }: HeroSectionProps) {
     }
   }
 
+  const socialProofUsers = [
+    { initials: "JW", color: "bg-blue-500" },
+    { initials: "MS", color: "bg-purple-500" },
+    { initials: "ZR", color: "bg-pink-500" },
+  ]
+
+  const farcasterPlatforms = [
+    { name: "TikTok", icon: "🎵", color: "text-black" },
+    { name: "YouTube", icon: "▶️", color: "text-red-600" },
+    { name: "Instagram", icon: "📸", color: "text-pink-600" },
+    { name: "LinkedIn", icon: "in", color: "text-blue-600" },
+    { name: "X", icon: "𝕏", color: "text-black" },
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-white via-sky-50/50 to-indigo-50/30 relative overflow-hidden">
       {/* Animated grid pattern background */}
@@ -48,6 +62,28 @@ export function HeroSection({ onSubmit }: HeroSectionProps) {
         style={{ animationDelay: "1s" }}
       />
 
+      <div className="absolute top-20 left-10 w-24 h-32 bg-white rounded-lg shadow-lg opacity-60 transform -rotate-12 animate-float hidden md:block">
+        <div className="p-2 h-full flex flex-col gap-1">
+          <div className="h-2 bg-slate-200 rounded w-3/4"></div>
+          <div className="h-2 bg-slate-200 rounded w-1/2"></div>
+          <div className="flex-1 bg-gradient-to-br from-sky-100 to-indigo-100 rounded"></div>
+        </div>
+      </div>
+
+      <div className="absolute top-32 right-12 w-28 h-28 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg shadow-lg opacity-50 transform rotate-12 animate-float-slow hidden lg:block"></div>
+
+      <div className="absolute bottom-20 left-20 w-32 h-24 bg-white rounded-lg shadow-lg opacity-60 transform rotate-6 animate-float hidden lg:block">
+        <div className="p-2 h-full flex flex-col gap-2">
+          <div className="h-3 bg-gradient-to-r from-sky-300 to-indigo-300 rounded w-full"></div>
+          <div className="flex gap-1">
+            <div className="h-2 bg-slate-200 rounded flex-1"></div>
+            <div className="h-2 bg-slate-200 rounded flex-1"></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="absolute bottom-32 right-16 w-24 h-24 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-full shadow-lg opacity-40 animate-bounce-soft hidden md:block"></div>
+
       <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-12">
         <div className="mb-8 flex items-center gap-3 group">
           <div className="relative">
@@ -65,15 +101,15 @@ export function HeroSection({ onSubmit }: HeroSectionProps) {
         </div>
 
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-4 text-balance">
-          <span className="text-slate-800 drop-shadow-sm">Welcome to </span>
+          <span className="text-slate-800 drop-shadow-sm">Track Your </span>
           <span className="bg-gradient-to-r from-sky-500 via-indigo-500 to-sky-500 bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
-            Activity Tracker
+            Farcaster Growth
           </span>
         </h1>
 
         {/* Subtext */}
         <p className="text-slate-500 text-center max-w-md mb-10 text-lg leading-relaxed">
-          Track your Farcaster activity and wallet transactions without needing to log in!
+          Real-time analytics, engagement insights, and growth tracking without needing to log in!
         </p>
 
         <form onSubmit={handleSubmit} className="w-full max-w-md">
@@ -147,6 +183,38 @@ export function HeroSection({ onSubmit }: HeroSectionProps) {
             </span>
           </Button>
         </form>
+
+        <div className="mt-12 flex flex-col items-center gap-3">
+          <div className="flex items-center gap-2">
+            <div className="flex -space-x-2">
+              {socialProofUsers.map((user, i) => (
+                <div
+                  key={i}
+                  className={`w-10 h-10 ${user.color} rounded-full flex items-center justify-center text-white text-xs font-bold border-2 border-white shadow-md`}
+                >
+                  {user.initials}
+                </div>
+              ))}
+            </div>
+            <span className="text-sm text-slate-600 font-medium">
+              <span className="font-bold text-slate-800">10K+</span> trusted users
+            </span>
+          </div>
+        </div>
+
+        <div className="mt-12 flex flex-col items-center gap-4">
+          <p className="text-xs text-slate-400 uppercase tracking-wider font-medium">Connected platforms</p>
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            {farcasterPlatforms.map((platform, i) => (
+              <div
+                key={i}
+                className="w-12 h-12 rounded-full bg-white shadow-md flex items-center justify-center text-lg hover:shadow-lg hover:scale-110 transition-all duration-300 cursor-pointer border border-slate-100"
+              >
+                <span className="text-xl">{platform.icon}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
         {/* Partner logos */}
         <div className="mt-16">
