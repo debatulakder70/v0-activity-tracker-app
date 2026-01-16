@@ -1,6 +1,6 @@
 "use client"
 
-import { ChevronDown, Heart, MessageCircle, TrendingUp, Users, Repeat2, Sparkles } from "lucide-react"
+import { ChevronDown, Heart, MessageCircle, TrendingUp, Users, Repeat2, Sparkles, Wand2 } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { ActivityCard } from "@/components/activity-card"
 import { StatBadge } from "@/components/stat-badge"
@@ -12,6 +12,8 @@ import {
   formatNumber,
 } from "@/hooks/use-farcaster"
 import { LoadingScreen } from "@/components/ui/activity-loader"
+import { useState } from "react"
+import { CardModal } from "@/components/activity-card-generator/card-modal"
 
 interface SocialActivitySectionProps {
   username: string
@@ -21,6 +23,7 @@ export function SocialActivitySection({ username }: SocialActivitySectionProps) 
   const { user, isLoading: userLoading } = useFarcasterUser(username)
   const { casts, isLoading: castsLoading } = useFarcasterCasts(user?.fid ?? null)
   const engagementStats = calculateEngagementStats(casts)
+  const [showCardModal, setShowCardModal] = useState(false)
 
   const isLoading = userLoading || castsLoading
 
@@ -77,10 +80,20 @@ export function SocialActivitySection({ username }: SocialActivitySectionProps) 
             </p>
           </div>
         </div>
-        <button className="flex items-center justify-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-white shadow-md border border-slate-100 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all duration-300 w-full sm:w-auto">
-          <span>Farcaster</span>
-          <ChevronDown className="w-4 h-4" />
-        </button>
+        <div className="flex gap-2 w-full sm:w-auto">
+          <button
+            onClick={() => setShowCardModal(true)}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg text-sm font-medium hover:shadow-xl transition-all duration-300"
+          >
+            <Wand2 className="w-4 h-4" />
+            <span className="hidden sm:inline">Generate Card</span>
+            <span className="sm:hidden">Card</span>
+          </button>
+          <button className="flex items-center justify-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-white shadow-md border border-slate-100 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all duration-300">
+            <span className="hidden sm:inline">Farcaster</span>
+            <ChevronDown className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
@@ -275,6 +288,8 @@ export function SocialActivitySection({ username }: SocialActivitySectionProps) 
           ))}
         </div>
       </div>
+
+      <CardModal isOpen={showCardModal} onClose={() => setShowCardModal(false)} username={username} />
     </div>
   )
 }
