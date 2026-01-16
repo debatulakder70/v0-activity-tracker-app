@@ -1,6 +1,8 @@
 "use client"
 
 import { Heart, Repeat2, MessageCircle, Download, Share2 } from "lucide-react"
+import { useRef } from "react"
+import html2canvas from "html2canvas"
 import type { NeynarUser } from "@/lib/neynar"
 import { formatNumber } from "@/hooks/use-farcaster"
 
@@ -13,7 +15,8 @@ interface ActivityCardProps {
 }
 
 export function ActivityCard({ user, engagementRate, totalLikes, totalRecasts, totalReplies }: ActivityCardProps) {
-  // Determine tier based on engagement rate
+  const cardRef = useRef<HTMLDivElement>(null)
+
   const getTier = (rate: number) => {
     if (rate >= 40)
       return { name: "DIAMOND", color: "from-purple-600 via-pink-500 to-cyan-400", bg: "from-purple-900 to-gray-900" }
@@ -26,10 +29,43 @@ export function ActivityCard({ user, engagementRate, totalLikes, totalRecasts, t
   const tier = getTier(engagementRate)
   const totalEngagement = totalLikes + totalRecasts + totalReplies
 
+  const handleDownload = async () => {
+    if (!cardRef.current) return
+
+    try {
+      const canvas = await html2canvas(cardRef.current, {
+        backgroundColor: null,
+        scale: 2,
+        logging: false,
+      })
+
+      const link = document.createElement("a")
+      link.href = canvas.toDataURL("image/png")
+      link.download = `activity-card-${user.username}-${Date.now()}.png`
+      link.click()
+    } catch (error) {
+      console.error("[v0] Failed to download card:", error)
+    }
+  }
+
+  const handleShare = () => {
+    const text = `Just generated my ${tier.name} Activity Card on @activity_tracker! 
+🎯 Engagement: ${engagementRate.toFixed(1)}
+❤️ ${formatNumber(totalLikes)} likes
+🔄 ${formatNumber(totalRecasts)} recasts
+💬 ${formatNumber(totalReplies)} replies
+
+Check yours: activity-tracker.online`
+
+    const url = `https://warpcast.com/~/compose?text=${encodeURIComponent(text)}`
+    window.open(url, "_blank")
+  }
+
   return (
     <div className="w-full max-w-sm mx-auto">
       {/* Card container */}
       <div
+        ref={cardRef}
         className={`relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 aspect-video bg-gradient-to-br ${tier.bg} group`}
       >
         {/* Animated background */}
@@ -113,13 +149,18 @@ export function ActivityCard({ user, engagementRate, totalLikes, totalRecasts, t
         </div>
       </div>
 
-      {/* Action buttons */}
       <div className="mt-4 flex gap-3">
-        <button className="flex-1 py-2 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+        <button
+          onClick={handleDownload}
+          className="flex-1 py-2 px-4 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+        >
           <Download className="w-4 h-4" />
-          Download
+          Download PNG
         </button>
-        <button className="flex-1 py-2 px-4 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+        <button
+          onClick={handleShare}
+          className="flex-1 py-2 px-4 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 hover:from-pink-600 hover:to-pink-700 text-white font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+        >
           <Share2 className="w-4 h-4" />
           Share
         </button>

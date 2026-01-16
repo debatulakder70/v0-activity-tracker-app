@@ -16,6 +16,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts"
+import { CardSection } from "@/components/activity-card-generator/card-section"
 
 interface GrowthSectionProps {
   username: string
@@ -243,6 +244,9 @@ export function GrowthSection({ username }: GrowthSectionProps) {
           </div>
         </Card>
       </div>
+
+      {/* Activity Card Generator */}
+      <CardSection username={username} />
 
       {/* Additional insights */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
