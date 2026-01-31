@@ -3,6 +3,7 @@
 import { Activity, Bell, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useFarcasterUser } from "@/hooks/use-farcaster"
+import { DonationBox } from "@/components/donation-box"
 
 interface DashboardHeaderProps {
   username: string
@@ -59,7 +60,9 @@ export function DashboardHeader({ username, activeTab, onTabChange }: DashboardH
         </nav>
 
         {/* Right side with enhanced styling */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-3">
+          <DonationBox />
+
           {/* Notification bell */}
           <Button
             variant="ghost"

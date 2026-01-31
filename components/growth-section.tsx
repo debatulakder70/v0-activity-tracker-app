@@ -16,7 +16,7 @@ import {
   CartesianGrid,
   Tooltip,
 } from "recharts"
-import { CardSection } from "@/components/activity-card-generator/card-section"
+
 
 interface GrowthSectionProps {
   username: string
@@ -143,7 +143,7 @@ export function GrowthSection({ username }: GrowthSectionProps) {
                   {[0.6, 0.4, 0.8, 0.5, 0.9, 0.3, 0.7, 1].map((val, idx) => (
                     <div
                       key={idx}
-                      className={`flex-1 rounded-t bg-gradient-to-t ${metric.gradient} opacity-60 transition-all duration-300`}
+                      className={`flex-1 rounded-t bg-gradient-to-t from-${metric.gradient} opacity-60 transition-all duration-300`}
                       style={{ height: `${val * 100}%` }}
                     />
                   ))}
@@ -244,9 +244,6 @@ export function GrowthSection({ username }: GrowthSectionProps) {
           </div>
         </Card>
       </div>
-
-      {/* Activity Card Generator */}
-      <CardSection username={username} />
 
       {/* Additional insights */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">

@@ -1,8 +1,9 @@
 "use client"
 
-import { ChevronDown, Heart, MessageCircle, TrendingUp, Users, Repeat2, Sparkles, Wand2 } from "lucide-react"
+import { useState } from "react"
+
+import { ChevronDown, Heart, MessageCircle, TrendingUp, Users, Repeat2, Sparkles } from "lucide-react"
 import { Card } from "@/components/ui/card"
-import { ActivityCard } from "@/components/activity-card"
 import { StatBadge } from "@/components/stat-badge"
 import {
   useFarcasterUser,
@@ -12,8 +13,7 @@ import {
   formatNumber,
 } from "@/hooks/use-farcaster"
 import { LoadingScreen } from "@/components/ui/activity-loader"
-import { useState } from "react"
-import { CardModal } from "@/components/activity-card-generator/card-modal"
+
 
 interface SocialActivitySectionProps {
   username: string
@@ -23,7 +23,6 @@ export function SocialActivitySection({ username }: SocialActivitySectionProps) 
   const { user, isLoading: userLoading } = useFarcasterUser(username)
   const { casts, isLoading: castsLoading } = useFarcasterCasts(user?.fid ?? null)
   const engagementStats = calculateEngagementStats(casts)
-  const [showCardModal, setShowCardModal] = useState(false)
 
   const isLoading = userLoading || castsLoading
 
@@ -80,20 +79,10 @@ export function SocialActivitySection({ username }: SocialActivitySectionProps) 
             </p>
           </div>
         </div>
-        <div className="flex gap-2 w-full sm:w-auto">
-          <button
-            onClick={() => setShowCardModal(true)}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg text-sm font-medium hover:shadow-xl transition-all duration-300"
-          >
-            <Wand2 className="w-4 h-4" />
-            <span className="hidden sm:inline">Generate Card</span>
-            <span className="sm:hidden">Card</span>
-          </button>
-          <button className="flex items-center justify-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-white shadow-md border border-slate-100 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all duration-300">
-            <span className="hidden sm:inline">Farcaster</span>
-            <ChevronDown className="w-4 h-4" />
-          </button>
-        </div>
+        <button className="flex items-center justify-center gap-2 px-4 py-2 md:px-5 md:py-2.5 rounded-xl bg-white shadow-md border border-slate-100 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all duration-300">
+          <span className="hidden sm:inline">Farcaster</span>
+          <ChevronDown className="w-4 h-4" />
+        </button>
       </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
@@ -272,24 +261,31 @@ export function SocialActivitySection({ username }: SocialActivitySectionProps) 
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           {casts.slice(0, 8).map((cast, i) => (
-            <div
-              key={cast.hash}
-              className="animate-in fade-in slide-in-from-bottom-4"
-              style={{ animationDelay: `${i * 50}ms` }}
-            >
-              <ActivityCard
-                content={cast.text}
-                likes={cast.reactions.likes_count}
-                comments={cast.replies.count}
-                recasts={cast.reactions.recasts_count}
-                time={formatRelativeTime(cast.timestamp)}
-              />
+          <Card
+            key={cast.hash}
+            className="p-4 rounded-xl bg-white border border-slate-100 hover:shadow-md transition-all duration-300"
+          >
+            <p className="text-sm text-slate-700 mb-3 line-clamp-2">{cast.text}</p>
+            <div className="flex items-center gap-4 text-xs text-slate-500 pt-3 border-t border-slate-100">
+              <div className="flex items-center gap-1">
+                <Heart className="w-3 h-3" />
+                <span>{formatNumber(cast.reactions.likes_count)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Repeat2 className="w-3 h-3" />
+                <span>{formatNumber(cast.reactions.recasts_count)}</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <MessageCircle className="w-3 h-3" />
+                <span>{formatNumber(cast.replies.count)}</span>
+              </div>
+              <span className="ml-auto text-xs text-slate-400">{formatRelativeTime(cast.timestamp)}</span>
             </div>
-          ))}
+          </Card>
+        ))}
         </div>
       </div>
 
-      <CardModal isOpen={showCardModal} onClose={() => setShowCardModal(false)} username={username} />
     </div>
   )
 }
