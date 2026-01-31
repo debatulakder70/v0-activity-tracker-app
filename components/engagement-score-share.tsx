@@ -30,8 +30,7 @@ export function EngagementScoreShare({ score, user, casts, tier }: EngagementSco
   const handleShare = async () => {
     setIsSharing(true)
     try {
-      const imageData = await downloadCardImage()
-      await shareToFarcaster(shareText, imageData)
+      await shareToFarcaster(shareText, score, tier.tier, user?.username || 'Anonymous')
     } catch (error) {
       console.error('[v0] Sharing error:', error)
     } finally {
