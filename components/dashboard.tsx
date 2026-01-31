@@ -8,6 +8,7 @@ import { SocialActivitySection } from "@/components/social-activity-section"
 import { StatsSection } from "@/components/stats-section"
 import { GuideSection } from "@/components/guide-section"
 import { SettingsSection } from "@/components/settings-section"
+import { ShareCardSection } from "@/components/share-card-section"
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern"
 import { cn } from "@/lib/utils"
 import { GrowthSection } from "@/components/growth-section"
@@ -57,6 +58,7 @@ export function Dashboard({ username, onLogout }: DashboardProps) {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             {activeTab === "social" && <SocialActivitySection username={username} />}
             {activeTab === "growth" && <GrowthSection username={username} />}
+            {activeTab === "share" && <ShareCardSection username={username} />}
             {activeTab === "stats" && <StatsSection username={username} />}
             {activeTab === "guide" && <GuideSection username={username} />}
             {activeTab === "settings" && <SettingsSection username={username} onLogout={onLogout} />}
