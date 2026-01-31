@@ -51,23 +51,30 @@ export function useEngagementScoreSharing() {
     }
   }
 
-  const shareToFarcaster = async (text: string, imageData?: string) => {
+  const shareToFarcaster = async (text: string, score: number, tier: string, username: string) => {
     const isBaseApp = typeof window !== 'undefined' && (window as any).farcaster
 
+    // Generate frame URL
+    const frameUrl = `https://activity-tracker.online/api/frame/engagement?username=${encodeURIComponent(username)}&score=${score}&tier=${encodeURIComponent(tier)}`
+
     if (isBaseApp) {
-      // Use Base App Farcaster integration
+      // Use Base App Farcaster integration with frame
       try {
         await (window as any).farcaster.requestCastComposer({
           text,
-          embeds: imageData ? [{ mimeType: 'image/png', data: imageData }] : [],
+          embeds: [
+            {
+              url: frameUrl,
+            },
+          ],
         })
       } catch (error) {
         console.error('[v0] Base App share error:', error)
         fallbackToWarpcast(text)
       }
     } else {
-      // Fallback to Warpcast
-      fallbackToWarpcast(text)
+      // Fallback to Warpcast with frame URL in text
+      fallbackToWarpcast(`${text}\n\n${frameUrl}`)
     }
   }
 
